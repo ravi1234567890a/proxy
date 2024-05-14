@@ -1,0 +1,30 @@
+from flask import Flask, request, jsonify
+import requests
+
+app = Flask(__name__)
+
+# Define GitHub API base URL
+GITHUB_API_BASE_URL = "https://api.github.com"
+
+@app.route('/github-proxy/<path:path>', methods=['GET'])
+def github_proxy(path):
+    # Construct the full URL to the GitHub API endpoint
+    github_url = f"{GITHUB_API_BASE_URL}/{path}"
+
+    try:
+        # Make a request to GitHub API
+        response = requests.get(github_url)
+
+        # Check if request was successful
+        if response.status_code == 200:
+            # Return JSON response
+            return jsonify(response.json()), 200
+        else:
+            # Return error message if request was not successful
+            return jsonify({"error": "Failed to fetch data from GitHub"}), response.status_code
+    except Exception as e:
+        # Return error message if an exception occurs
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
